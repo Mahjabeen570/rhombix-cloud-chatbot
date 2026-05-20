@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rhombix AI Chatbot</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+        }
+
+        .chat-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #2563eb;
+            border-radius: 50%;
+            color: white;
+            font-size: 28px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .chat-container {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 360px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: #2563eb;
+            color: white;
+            padding: 15px;
+        }
+
+        .chat-header h2 {
+            font-size: 18px;
+        }
+
+        #chatbox {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background: #f9fafb;
+        }
+
+        .message {
+            margin: 8px 0;
+            display: flex;
+        }
+
+        .user {
+            justify-content: flex-end;
+        }
+
+        .bot {
+            justify-content: flex-start;
+        }
+
+        .bubble {
+            max-width: 75%;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        .user .bubble {
+            background: #2563eb;
+            color: white;
+        }
+
+        .bot .bubble {
+            background: #e5e7eb;
+            color: black;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        button {
+            margin-left: 8px;
+            padding: 10px 14px;
+            border: none;
+            background: #2563eb;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .welcome {
+            padding: 15px;
+            color: gray;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Floating button -->
+<div class="chat-toggle" onclick="toggleChat()">🤖</div>
+
+<!-- Chat window -->
+<div class="chat-container" id="chatContainer">
+
+    <div class="chat-header">
+        <h2>Rhombix AI Assistant</h2>
+    </div>
+
+    <div id="chatbox">
+
+        <!-- ONLY WELCOME MESSAGE -->
+        <div class="message bot">
+            <div class="bubble">
+                Hello 👋<br>
+                How can I help you today?
+            </div>
+        </div>
+
+    </div>
+
+    <div class="input-area">
+        <input id="userInput" type="text" placeholder="Type message..." onkeypress="handleKey(event)">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+</div>
+
+<script>
+
+function toggleChat() {
+    let chat = document.getElementById("chatContainer");
+
+    if (chat.style.display === "flex") {
+        chat.style.display = "none";
+    } else {
+        chat.style.display = "flex";
+    }
+}
+
+function sendMessage() {
+    let msg = document.getElementById("userInput").value;
+    if (!msg) return;
+
+    // show user message instantly
+    document.getElementById("chatbox").innerHTML +=
+        "<div class='message user'><div class='bubble'>" + msg + "</div></div>";
+
+    fetch("/get", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "msg=" + encodeURIComponent(msg)
+    })
+    .then(res => res.text())
+    .then(data => {
+        document.getElementById("chatbox").innerHTML +=
+            "<div class='message bot'><div class='bubble'>" + data + "</div></div>";
+
+        document.getElementById("chatbox").scrollTop =
+            document.getElementById("chatbox").scrollHeight;
+    });
+
+    document.getElementById("userInput").value = "";
+}
+
+function handleKey(event) {
+    if (event.key === "Enter") {
+        sendMessage();
+    }
+}
+
+</script>
+
+</body>
+</html>
